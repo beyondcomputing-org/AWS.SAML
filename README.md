@@ -10,7 +10,7 @@ See module manifest `AWS.SAML.psd1` for more information.
 To get more information on each cmdlet run `Get-Help <CMDLET Name>`
 
 #### Authentication CMDLETs
-- ...
+- Login-AWSSAML
 
 ## Changes
 See CHANGELOG.md for more information.
