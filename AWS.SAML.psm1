@@ -23,8 +23,8 @@ function New-AWSSAMLLogin {
     [Alias('Login-AWSSAML')]
     param(
         [String]$InitURL,
-        [ValidateSet('Chrome', 'Firefox', 'Edge')]
-        [String]$Browser
+        [ValidateSet('Chrome', 'Firefox', 'Edge', 'IE')]
+        [String]$Browser = 'Chrome'
     )
     if ($pscmdlet.ShouldProcess('AWS SAML', 'login'))
     {
@@ -32,77 +32,152 @@ function New-AWSSAMLLogin {
             $InitURL = Get-AWSSAMLURL
         }
 
-        # Open Chrome and launch login page
-        switch ($Browser) {
-            'Firefox' {
-                $Driver = Start-SeFirefox
-            }
-            'Edge' {
-                $Driver = Start-SeEdge
-            }
-            Default {
-                $Driver = Start-SeChrome
-            }
-        }
+        # Start Browser for Login
+        $driver = Start-Browser -InitURL $InitURL -Browser $Browser
 
-        Enter-SeUrl $InitURL -Driver $Driver
+        # Get SAML Assertion
+        $samlAssertion = Get-SAMLAssertion -Driver $driver
 
-        # Wait for SAML Form
-        Write-Progress 'Please login to the console.  Once you login we will extract the STS token.'
-        do {
-            Start-Sleep 1
-        } until ($Driver.url -eq 'https://signin.aws.amazon.com/saml')
+        # Get Selected Role
+        $consoleData = Get-ConsoleData -Driver $driver
 
-        Write-Progress 'Extracting SAML Assertion'
-        $Element = Find-SeElement -name 'SAMLResponse' -Driver $Driver
-        $SAML_Encoded = Get-SeElementAttribute -Element $Element -Attribute 'Value'
-        $SAML = [xml][System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($SAML_Encoded))
+        # Get Role Details from SAML
+        $arns = Get-SAMLRole -Assertion $samlAssertion -AccountID $consoleData.AccountID -Role $consoleData.Role
 
-        # Create XML Namespace
-        $XMLNamespace = @{saml2 = 'urn:oasis:names:tc:SAML:2.0:assertion'}
+        # Get STS Credentials with SAML
+        $sts = Use-STSRoleWithSAML -PrincipalArn $arns.PrincipalArn -RoleArn $arns.RoleArn -SAMLAssertion $samlAssertion
 
-        # Get Roles
-        $RolesXML = Select-Xml -Xml $SAML -XPath "//saml2:Attribute[@Name='https://aws.amazon.com/SAML/Attributes/Role']" -Namespace $XMLNamespace | Select-Object -ExpandProperty Node
-        $Roles = $RolesXML.AttributeValue.'#text'
-
-        # Wait for user to complete login process
-        Write-Progress 'Please select the role that you would like to use'
-        do {
-            Start-Sleep 1
-        } until ($Driver.Title -eq 'AWS Management Console')
-
-        # Getting Data from Cookies
-        Write-Progress 'Detected Console Login!  Getting details and closing browser.'
-        $cookies = $Driver.Manage().Cookies.AllCookies
-        $userInfo = $cookies | Where-Object Name -eq 'aws-userInfo'
-        $userInfo = [System.Web.HttpUtility]::UrlDecode($userInfo.Value) | ConvertFrom-Json
-        $accountID = ($UserInfo.arn -split ':')[4]
-        $role = (($UserInfo.arn -split ':')[5] -split '/')[1]
-        $name = ($userInfo.arn -split '/')[-1]
-
-        # Output data to Console
-        Write-Output "Logged into account: " $userInfo.alias
-        Write-Output "ID: " $accountID
-        Write-Output "Logged in as: " $name
-        Write-Output "With Role: " $role
-
-        # Get Role ARN's
-        $RoleArns = ($Roles | Select-String "$accountID`:role/$role") -split ','
-
-        # Attempt Login
-        $STS = Use-STSRoleWithSAML -PrincipalArn $RoleArns[1] -RoleArn $RoleArns[0] -SAMLAssertion $SAML_Encoded
-
-        $ENV:AWS_ACCESS_KEY_ID = $STS.Credentials.AccessKeyId
-        $ENV:AWS_SECRET_ACCESS_KEY = $STS.Credentials.SecretAccessKey
-        $ENV:AWS_SESSION_TOKEN = $STS.Credentials.SessionToken
-
-        Write-Output "Your session is now good until $($STS.Credentials.Expiration)"
-
+        # Store Credentials for use
+        Add-AWSSTSCreds -STS $sts
+        
         # Close Browser
         $Driver.Close()
+
+        # Output Console Data
+        Write-Output "Logged into account: $($consoleData.Alias)"
+        Write-Output "ID: $($consoleData.AccountID)"
+        Write-Output "Logged in as: $($consoleData.Name)"
+        Write-Output "With Role: $($consoleData.Role)"
+        Write-Output "Your session is now good until: $($sts.Credentials.Expiration)"
     }
 }
 
+function Add-AWSSTSCreds{
+    [CmdletBinding()]
+    param(
+        $STS
+    )
+    $ENV:AWS_ACCESS_KEY_ID = $STS.Credentials.AccessKeyId
+    $ENV:AWS_SECRET_ACCESS_KEY = $STS.Credentials.SecretAccessKey
+    $ENV:AWS_SESSION_TOKEN = $STS.Credentials.SessionToken
+}
+
+function Get-SAMLRole{
+    [CmdletBinding()]
+    param(
+        $Assertion,
+        $AccountID,
+        $Role
+    )
+
+    # Convert Assertion to XML
+    $saml = [xml][System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Assertion))
+
+    # Create XML Namespace
+    $xmlNamespace = @{saml2 = 'urn:oasis:names:tc:SAML:2.0:assertion'}
+
+    # Get Roles
+    $rolesXML = Select-Xml -Xml $saml -XPath "//saml2:Attribute[@Name='https://aws.amazon.com/SAML/Attributes/Role']" -Namespace $xmlNamespace | Select-Object -ExpandProperty Node
+    $roles = $rolesXML.AttributeValue.'#text'
+
+    # Get Role ARN's
+    $arns = ($roles | Select-String "$AccountID`:role/$Role") -split ','
+
+    return @{
+        PrincipalArn = $arns[1]
+        RoleArn = $arns[0]
+    }
+}
+
+function Get-ConsoleData{
+    [CmdletBinding()]
+    param(
+        $Driver
+    )
+    # Wait for user to complete login process
+    Write-Progress 'Please select the role that you would like to use and login to the console.'
+    do {
+        Start-Sleep -Milliseconds 100
+    } until ($Driver.Title -eq 'AWS Management Console')
+
+    # Getting Data from Cookies
+    Write-Progress 'Detected Console Login!  Getting details and closing browser.'
+    $cookies = $Driver.Manage().Cookies.AllCookies
+
+    Return Get-CookieData -Cookies $cookies
+}
+
+function Get-CookieData{
+    [CmdletBinding()]
+    param(
+        $Cookies
+    )
+    $userInfo = $Cookies | Where-Object Name -eq 'aws-userInfo'
+    $info = [System.Web.HttpUtility]::UrlDecode($userInfo.Value) | ConvertFrom-Json
+
+    return @{
+        AccountID = ($info.arn -split ':')[4]
+        Alias = $info.alias
+        Role = (($info.arn -split ':')[5] -split '/')[1]
+        Name = ($info.arn -split '/')[-1]
+    }
+}
+
+function Get-SAMLAssertion {
+    [CmdletBinding()]
+    param(
+        $Driver
+    )
+    
+    # Wait for SAML Form
+    Write-Progress 'Please login to the console.  Once you login we will pull the SAML Assertion.'
+    do {
+        Start-Sleep -Milliseconds 100
+    } until ($Driver.url -eq 'https://signin.aws.amazon.com/saml')
+
+    Write-Progress 'Extracting SAML Assertion'
+    $Element = Find-SeElement -name 'SAMLResponse' -Driver $Driver
+    return Get-SeElementAttribute -Element $Element -Attribute 'Value'
+}
+
+function Start-Browser {
+    [CmdletBinding()]
+    param(
+        [String]$InitURL,
+        [ValidateSet('Chrome', 'Firefox', 'Edge', 'IE')]
+        [String]$Browser
+    )
+
+    # Open Browser and launch login page
+    switch ($Browser) {
+        'Firefox' {
+            $Driver = Start-SeFirefox
+        }
+        'Edge' {
+            $Driver = Start-SeEdge
+        }
+        'IE' {
+            $Driver = Start-SeInternetExplorer
+        }
+        Default {
+            $Driver = Start-SeChrome
+        }
+    }
+
+    Enter-SeUrl $InitURL -Driver $Driver
+
+    Return $Driver
+}
 
 function Save-AWSSAMLURL {
     [CmdletBinding()]

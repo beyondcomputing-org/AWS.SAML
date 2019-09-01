@@ -12,7 +12,7 @@
     RootModule        = 'AWS.SAML.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '0.1.0'
+    ModuleVersion     = '0.2.0'
 
     # Supported PSEditions
     # CompatiblePSEditions = @('Desktop', 'Core')
@@ -53,7 +53,7 @@
     # Modules that must be imported into the global environment prior to importing this module
     RequiredModules = @(
         @{ModuleName="Selenium"; ModuleVersion="1.2"; Guid="a3bdb8c3-c150-48a8-b56d-cd4d43f46a26"},
-        @{ModuleName="AWSPowerShell.NetCore"; ModuleVersion="3.3.563.1"; Guid="cb0b9b96-f3f2-4eff-b7f4-cbe0a9203683"}
+        @{ModuleName="AWS.Tools.SecurityToken"; ModuleVersion="3.3.563.1"; Guid="b760f2e8-291f-4df4-bd69-3a615b47c8d4"}
     )
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
