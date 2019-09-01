@@ -16,7 +16,7 @@ $SAVE_PATH = $SAVE_DIR + '/' + $SAVE_FILE
         The SAML Login Initiation URL.  If not passed you will be prompted and it will be saved for future use.
 
     .PARAMETER Browser
-        Choose the browser to handle the login process.  Options: Chrome, Firefox, Edge  Default: Chrome
+        Choose the browser to handle the login process.  Options: Chrome, Firefox, Edge, IE  Default: Chrome
 #>
 function New-AWSSAMLLogin {
     [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
@@ -187,23 +187,30 @@ function Start-Browser {
 function Save-AWSSAMLURL {
     [CmdletBinding()]
     param(
+        $SaveDir = $SAVE_DIR,
+        $SavePath = $SAVE_PATH
     )
 
     $URL = Read-Host -Prompt 'Enter the SSO Initiation URL'
 
     # Save the settings to the local system
-    if(!(Test-Path($SAVE_DIR))){
-        New-Item -Type Directory -Path $SAVE_DIR | Out-Null
+    if(!(Test-Path($SaveDir))){
+        New-Item -Type Directory -Path $SaveDir | Out-Null
     }
 
-    $URL | Export-CliXml -Path ($SAVE_PATH)  -Encoding 'utf8' -Force
+    $URL | Export-CliXml -Path ($SavePath)  -Encoding 'utf8' -Force
 
     return $URL
 }
 
 function Get-AWSSAMLURL {
-    if(Test-Path($SAVE_PATH)){
-        return Import-CliXml -Path ($SAVE_PATH)
+    [CmdletBinding()]
+    param(
+        $SavePath = $SAVE_PATH
+    )
+
+    if(Test-Path($SavePath)){
+        return Import-CliXml -Path ($SavePath)
     }else{
         Return Save-AWSSAMLURL
     }
