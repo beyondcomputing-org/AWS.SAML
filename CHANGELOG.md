@@ -4,6 +4,10 @@
 *These will be removed in the next major release*
 - N/A
 
+0.3.0
+-----
+- Adding test coverage
+
 0.2.0
 -----
 - Updated to use new modular AWS Modules
