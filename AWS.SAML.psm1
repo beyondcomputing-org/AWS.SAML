@@ -48,8 +48,8 @@ function New-AWSSAMLLogin {
         $sts = Use-STSRoleWithSAML -PrincipalArn $arns.PrincipalArn -RoleArn $arns.RoleArn -SAMLAssertion $samlAssertion
 
         # Store Credentials for use
-        Add-AWSSTSCreds -STS $sts
-        
+        Add-AWSSTSCred -STS $sts
+
         # Close Browser
         $Driver.Close()
 
@@ -62,7 +62,7 @@ function New-AWSSAMLLogin {
     }
 }
 
-function Add-AWSSTSCreds{
+function Add-AWSSTSCred{
     [CmdletBinding()]
     param(
         $STS
@@ -73,6 +73,7 @@ function Add-AWSSTSCreds{
 }
 
 function Get-SAMLRole{
+    [OutputType([System.Collections.Hashtable])]
     [CmdletBinding()]
     param(
         $Assertion,
@@ -93,7 +94,7 @@ function Get-SAMLRole{
     # Get Role ARN's
     $arns = ($roles | Select-String "$AccountID`:role/$Role") -split ','
 
-    return @{
+    return [ordered]@{
         PrincipalArn = $arns[1]
         RoleArn = $arns[0]
     }
@@ -118,6 +119,7 @@ function Get-ConsoleData{
 }
 
 function Get-CookieData{
+    [OutputType([System.Collections.Hashtable])]
     [CmdletBinding()]
     param(
         $Cookies
@@ -125,7 +127,7 @@ function Get-CookieData{
     $userInfo = $Cookies | Where-Object Name -eq 'aws-userInfo'
     $info = [System.Web.HttpUtility]::UrlDecode($userInfo.Value) | ConvertFrom-Json
 
-    return @{
+    return [ordered]@{
         AccountID = ($info.arn -split ':')[4]
         Alias = $info.alias
         Role = (($info.arn -split ':')[5] -split '/')[1]
@@ -138,7 +140,7 @@ function Get-SAMLAssertion {
     param(
         $Driver
     )
-    
+
     # Wait for SAML Form
     Write-Progress 'Please login to the console.  Once you login we will pull the SAML Assertion.'
     do {
@@ -151,32 +153,35 @@ function Get-SAMLAssertion {
 }
 
 function Start-Browser {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
     param(
         [String]$InitURL,
         [ValidateSet('Chrome', 'Firefox', 'Edge', 'IE')]
         [String]$Browser
     )
 
-    # Open Browser and launch login page
-    switch ($Browser) {
-        'Firefox' {
-            $Driver = Start-SeFirefox
+    if ($pscmdlet.ShouldProcess($Browser, 'start'))
+    {
+        # Open Browser and launch login page
+        switch ($Browser) {
+            'Firefox' {
+                $Driver = Start-SeFirefox
+            }
+            'Edge' {
+                $Driver = Start-SeEdge
+            }
+            'IE' {
+                $Driver = Start-SeInternetExplorer
+            }
+            Default {
+                $Driver = Start-SeChrome
+            }
         }
-        'Edge' {
-            $Driver = Start-SeEdge
-        }
-        'IE' {
-            $Driver = Start-SeInternetExplorer
-        }
-        Default {
-            $Driver = Start-SeChrome
-        }
+
+        Enter-SeUrl $InitURL -Driver $Driver
+
+        Return $Driver
     }
-
-    Enter-SeUrl $InitURL -Driver $Driver
-
-    Return $Driver
 }
 
 function Save-AWSSAMLURL {
