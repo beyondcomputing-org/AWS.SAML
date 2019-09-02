@@ -4,6 +4,11 @@
 *These will be removed in the next major release*
 - N/A
 
+0.4.0
+-----
+- Updating Selenium dependency to 2.0.0
+- Defaulting Chrome to use app mode and profile option to allow credential re-use
+
 0.3.0
 -----
 - Adding test coverage

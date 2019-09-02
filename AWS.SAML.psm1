@@ -24,7 +24,8 @@ function New-AWSSAMLLogin {
     param(
         [String]$InitURL,
         [ValidateSet('Chrome', 'Firefox', 'Edge', 'IE')]
-        [String]$Browser = 'Chrome'
+        [String]$Browser = 'Chrome',
+        [Switch]$NoProfile
     )
     if ($pscmdlet.ShouldProcess('AWS SAML', 'login'))
     {
@@ -33,7 +34,7 @@ function New-AWSSAMLLogin {
         }
 
         # Start Browser for Login
-        $driver = Start-Browser -InitURL $InitURL -Browser $Browser
+        $driver = Start-Browser -InitURL $InitURL -Browser $Browser -NoProfile:$NoProfile
 
         # Get SAML Assertion
         $samlAssertion = Get-SAMLAssertion -Driver $driver
@@ -51,7 +52,7 @@ function New-AWSSAMLLogin {
         Add-AWSSTSCred -STS $sts
 
         # Close Browser
-        $Driver.Close()
+        $Driver.quit()
 
         # Output Console Data
         Write-Output "Logged into account: $($consoleData.Alias)"
@@ -157,7 +158,8 @@ function Start-Browser {
     param(
         [String]$InitURL,
         [ValidateSet('Chrome', 'Firefox', 'Edge', 'IE')]
-        [String]$Browser
+        [String]$Browser,
+        [Switch]$NoProfile
     )
 
     if ($pscmdlet.ShouldProcess($Browser, 'start'))
@@ -165,20 +167,25 @@ function Start-Browser {
         # Open Browser and launch login page
         switch ($Browser) {
             'Firefox' {
-                $Driver = Start-SeFirefox
+                Write-Warning 'FireFox functionality has not been tested!'
+                $Driver = Start-SeFirefox -StartURL $InitURL
             }
             'Edge' {
-                $Driver = Start-SeEdge
+                Write-Warning 'Edge functionality has not been tested!'
+                $Driver = Start-SeEdge -StartURL $InitURL
             }
             'IE' {
-                $Driver = Start-SeInternetExplorer
+                Write-Warning 'IE functionality has not been tested!'
+                $Driver = Start-SeInternetExplorer -StartURL $InitURL
             }
             Default {
-                $Driver = Start-SeChrome
+                if($NoProfile){
+                    $Driver = Start-SeChrome -Arguments @("--app=$InitURL")
+                }else{
+                    $Driver = Start-SeChrome -ProfileDirectoryPath "$SAVE_DIR\Chrome" -Arguments @("--app=$InitURL")
+                }
             }
         }
-
-        Enter-SeUrl $InitURL -Driver $Driver
 
         Return $Driver
     }
