@@ -1,5 +1,5 @@
 # AWS.SAML
-See module manifest `AWS.SAML.psd1` for more information.
+![](AWS.SAML.gif)
 
 ## Build Status
 |Windows|Linux|macOS|
@@ -7,8 +7,17 @@ See module manifest `AWS.SAML.psd1` for more information.
 |[![Build Status](https://beyondcomputing.visualstudio.com/PowerShell%20Modules/_apis/build/status/beyondcomputing-org.AWS.SAML?branchName=master&jobName=Build_PS_Win2016)](https://beyondcomputing.visualstudio.com/PowerShell%20Modules/_build/latest?definitionId=7&branchName=master)|[![Build Status](https://beyondcomputing.visualstudio.com/PowerShell%20Modules/_apis/build/status/beyondcomputing-org.AWS.SAML?branchName=master&jobName=Build_PSCore_Ubuntu1604)](https://beyondcomputing.visualstudio.com/PowerShell%20Modules/_build/latest?definitionId=7&branchName=master)|[![Build Status](https://beyondcomputing.visualstudio.com/PowerShell%20Modules/_apis/build/status/beyondcomputing-org.AWS.SAML?branchName=master&jobName=Build_PSCore_MacOS1013)](https://beyondcomputing.visualstudio.com/PowerShell%20Modules/_build/latest?definitionId=7&branchName=master)|
 
 ## Using The Module
+### Installation
+Run the following command in an elevated PowerShell session to install the module from the PowerShell Gallery.
+```powershell
+Install-Module AWS.SAML
+```
+
 ### How To Login
-Invoke Login-AWSSAML to login.  On the first run you will be prompted for the SSO Initiation URL.  The Initiation URL is saved in a file in your profile for subsequent uses.
+In a PowerShell window run the following command to authenticate your CLI session with AWS.  On the first run you will be prompted for the SSO Initiation URL.  The Initiation URL is saved in a file in your profile for subsequent uses.
+```powershell
+Login-AWSSAML
+```
 
 ### SSO Initiation URL
 The Initiation URL is the URL that you would login to start the SSO process.  This is the URL provided by your IT team or the first URL that your SSO App Launcher takes you to.
@@ -36,3 +45,6 @@ See CONTRIBUTING.md for more information.
 
 ## License
 See LICENSE.md for more information.
+
+## Module Manifest
+See module manifest `AWS.SAML.psd1` for more information.
