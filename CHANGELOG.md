@@ -4,6 +4,10 @@
 *These will be removed in the next major release*
 - N/A
 
+0.5.1
+-----
+- Fixed Chrome Profile Path
+
 0.5.0
 -----
 - Improved support for macOS

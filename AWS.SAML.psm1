@@ -178,7 +178,7 @@ function Start-Browser {
                 if($NoProfile){
                     $Driver = Start-SeChrome -Arguments @("--app=$InitURL")
                 }else{
-                    $Driver = Start-SeChrome -ProfileDirectoryPath "$SAVE_DIR\Chrome" -Arguments @("--app=$InitURL")
+                    $Driver = Start-SeChrome -ProfileDirectoryPath "$(Get-SaveDir)\Chrome" -Arguments @("--app=$InitURL")
                 }
             }
         }
