@@ -4,6 +4,10 @@
 *These will be removed in the next major release*
 - N/A
 
+0.5.0
+-----
+- Improved support for macOS
+
 0.4.0
 -----
 - Updating Selenium dependency to 2.0.0

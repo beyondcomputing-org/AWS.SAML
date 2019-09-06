@@ -4,7 +4,7 @@ jobs:
       vmImage: vs2017-win2016
     steps:
     - powershell: |
-        .\Build.ps1
+        .\Build.ps1 -NonInteractive -NoLogo -NoProfile
       displayName: 'Test'
 
     - task: PublishTestResults@2
@@ -40,7 +40,7 @@ jobs:
       displayName: 'Install PowerShell Core'
  
     - script: |
-        pwsh -c '.\Build.ps1'
+        pwsh -c '.\Build.ps1' -NonInteractive -NoLogo -NoProfile
       displayName: 'Test'
  
     - task: PublishTestResults@2
@@ -62,7 +62,7 @@ jobs:
       displayName: 'Install PowerShell Core'
  
     - script: |
-        pwsh -c '.\Build.ps1'
+        pwsh -c '.\Build.ps1' -NonInteractive -NoLogo -NoProfile
       displayName: 'Test'
  
     - task: PublishTestResults@2

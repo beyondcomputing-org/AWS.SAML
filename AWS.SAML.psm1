@@ -1,7 +1,3 @@
-$SAVE_DIR = "${env:\userprofile}\.AWS.SAML"
-$SAVE_FILE = 'Settings.xml'
-$SAVE_PATH = $SAVE_DIR + '/' + $SAVE_FILE
-
 <#
     .SYNOPSIS
         Get AWS STS credentials for using in the CLI from a SAML based login.
@@ -194,9 +190,9 @@ function Start-Browser {
 function Save-AWSSAMLURL {
     [CmdletBinding()]
     param(
-        $SaveDir = $SAVE_DIR,
-        $SavePath = $SAVE_PATH
     )
+
+    $SaveDir = Get-SaveDir
 
     $URL = Read-Host -Prompt 'Enter the SSO Initiation URL'
 
@@ -205,20 +201,35 @@ function Save-AWSSAMLURL {
         New-Item -Type Directory -Path $SaveDir | Out-Null
     }
 
-    $URL | Export-CliXml -Path ($SavePath)  -Encoding 'utf8' -Force
+    $URL | Export-CliXml -Path ("$SaveDir\Settings.xml")  -Encoding 'utf8' -Force
 
     return $URL
 }
 
 function Get-AWSSAMLURL {
+    [OutputType([String])]
     [CmdletBinding()]
     param(
-        $SavePath = $SAVE_PATH
     )
+
+    $SavePath = "$(Get-SaveDir)\Settings.xml"
 
     if(Test-Path($SavePath)){
         return Import-CliXml -Path ($SavePath)
     }else{
         Return Save-AWSSAMLURL
+    }
+}
+
+function Get-SaveDir {
+    [OutputType([String])]
+    [CmdletBinding()]
+    param(
+    )
+
+    if($IsMacOS){
+        return "${env:\home}\.AWS.SAML"
+    }else{
+        return "${env:\userprofile}\.AWS.SAML"
     }
 }
