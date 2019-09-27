@@ -44,3 +44,16 @@ function Get-SaveDir {
         return "${env:\userprofile}\.AWS.SAML"
     }
 }
+
+function Get-AWSDirectory{
+    [OutputType([String])]
+    [CmdletBinding()]
+    param(
+    )
+
+    if($IsMacOS){
+        return "${env:\HOME}/.aws/"
+    }else{
+        return "${env:\userprofile}\.aws\"
+    }
+}

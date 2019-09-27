@@ -25,7 +25,9 @@ function New-AWSSAMLLogin {
         [String]$InitURL,
         [ValidateSet('Chrome', 'Firefox', 'Edge', 'IE')]
         [String]$Browser = 'Chrome',
-        [Switch]$NoProfile
+        [Switch]$NoBrowserProfile,
+        [Alias('Profile')]
+        [String]$ProfileName
     )
     if ($pscmdlet.ShouldProcess('AWS SAML', 'login'))
     {
@@ -34,13 +36,16 @@ function New-AWSSAMLLogin {
         }
 
         # Start Browser for Login
-        $driver = Start-Browser -InitURL $InitURL -Browser $Browser -NoProfile:$NoProfile
+        $driver = Start-Browser -InitURL $InitURL -Browser $Browser -NoProfile:$NoBrowserProfile
 
         # Get SAML Assertion
         $samlAssertion = Get-SAMLAssertion -Driver $driver
 
         # Get Selected Role
         $consoleData = Get-ConsoleData -Driver $driver
+
+        # Close Browser
+        $Driver.quit()
 
         # Get Role Details from SAML
         $arns = Get-SAMLRole -Assertion $samlAssertion -AccountID $consoleData.AccountID -Role $consoleData.Role
@@ -49,10 +54,7 @@ function New-AWSSAMLLogin {
         $sts = Use-STSRoleWithSAML -PrincipalArn $arns.PrincipalArn -RoleArn $arns.RoleArn -SAMLAssertion $samlAssertion
 
         # Store Credentials for use
-        Add-AWSSTSCred -STS $sts
-
-        # Close Browser
-        $Driver.quit()
+        Add-AWSSTSCred -STS $sts -ProfileName $ProfileName
 
         # Output Console Data
         Write-Output "Logged into account: $($consoleData.Alias)"
