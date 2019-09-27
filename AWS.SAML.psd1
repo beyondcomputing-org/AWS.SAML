@@ -12,7 +12,7 @@
     RootModule        = 'AWS.SAML.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '0.5.1'
+    ModuleVersion     = '0.6.0'
 
     # Supported PSEditions
     # CompatiblePSEditions = @('Desktop', 'Core')
@@ -82,7 +82,7 @@
     VariablesToExport = @()
 
     # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-    AliasesToExport   = @('Login-AWSSAML')
+    AliasesToExport   = @('Login-AWSSAML','las')
 
     # DSC resources to export from this module
     # DscResourcesToExport = @()

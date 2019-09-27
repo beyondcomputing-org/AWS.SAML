@@ -1,4 +1,4 @@
-Import-Module '.\AWS.SAML.psm1' -Force
+Import-Module '.\AWS.SAML.Browser.psm1' -Force
 
 Describe 'Get-CookieData' {
 

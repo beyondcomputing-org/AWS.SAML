@@ -1,15 +1,15 @@
-Import-Module '.\AWS.SAML.psm1' -Force
+Import-Module '.\AWS.SAML.Settings.psm1' -Force
 
 Describe 'Get-AWSSAMLURL' {
     $dir = 'TestDrive:\aws.saml'
     $path = "$dir\Settings.xml"
     $url = 'https://www.amazon.com'
 
-    Mock Get-SaveDir -ModuleName AWS.SAML { 
+    Mock Get-SaveDir -ModuleName AWS.SAML.Settings { 
         return 'TestDrive:\aws.saml'
     }
 
-    Mock Save-AWSSAMLURL -ModuleName AWS.SAML { 
+    Mock Save-AWSSAMLURL -ModuleName AWS.SAML.Settings { 
         Throw 'Error - Failed to find item in TestDrive'
     }
 

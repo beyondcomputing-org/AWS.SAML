@@ -4,6 +4,12 @@
 *These will be removed in the next major release*
 - N/A
 
+0.6.0
+-----
+- Fixed Chrome Profile Path for MacOS
+- Added alias `las` for Login-AWSSAML
+- Split out code base into multiple modules for easier maintenance
+
 0.5.1
 -----
 - Fixed Chrome Profile Path
