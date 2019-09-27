@@ -15,6 +15,7 @@ if(!(Test-Path $BuildFolder)){
 Copy-Item -Path 'AWS.SAML.psd1' -Destination $BuildFolder -Force
 Copy-Item -Path 'README.md' -Destination $BuildFolder -Force
 Copy-Item -Path 'CHANGELOG.md' -Destination $BuildFolder -Force
+Copy-Item -Path 'LICENSE.md' -Destination $BuildFolder -Force
 
 # Module Files
 Copy-Item -Path '*' -Destination $BuildFolder -Recurse -Include '*.psm1' -Force
