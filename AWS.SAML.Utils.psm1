@@ -3,7 +3,7 @@ function Add-AWSSTSCred{
     param(
         $STS
     )
-    
+
     $ENV:AWS_ACCESS_KEY_ID = $STS.Credentials.AccessKeyId
     $ENV:AWS_SECRET_ACCESS_KEY = $STS.Credentials.SecretAccessKey
     $ENV:AWS_SESSION_TOKEN = $STS.Credentials.SessionToken
