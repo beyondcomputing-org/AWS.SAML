@@ -60,14 +60,16 @@ function New-AWSSAMLLogin {
             Set-AWSProfile -ProfileName $ProfileName -AccessKeyId $sts.Credentials.AccessKeyId -SecretAccessKey $sts.Credentials.SecretAccessKey -SessionToken $sts.Credentials.SessionToken
         }else{
             # Store in Environment Variable
-            Add-AWSSTSCred -STS $sts -ProfileName $ProfileName
+            Add-AWSSTSCred -STS $sts
         }
 
         # Output Console Data
-        Write-Output "Logged into account: $($consoleData.Alias)"
-        Write-Output "ID: $($consoleData.AccountID)"
-        Write-Output "Logged in as: $($consoleData.Name)"
-        Write-Output "With Role: $($consoleData.Role)"
-        Write-Output "Your session is now good until: $($sts.Credentials.Expiration)"
+        return [PSCustomObject]@{
+            Account = $consoleData.Alias
+            AccountID = $consoleData.AccountID
+            User = $consoleData.Name
+            Role = $consoleData.Role
+            Expires = $sts.Credentials.Expiration
+        }
     }
 }

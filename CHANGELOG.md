@@ -4,6 +4,11 @@
 *These will be removed in the next major release*
 - N/A
 
+0.8.0
+-----
+- Fixed bug when not specifying profile
+- Updated output to be an object
+
 0.7.1
 -----
 - Added ~100 tests to profile management
