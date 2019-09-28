@@ -1,5 +1,3 @@
-using module .\AWS.SAML.Profile.psm1
-
 function Add-AWSSTSCred{
     [CmdletBinding()]
     param(
@@ -43,4 +41,23 @@ function Get-SAMLRole{
         PrincipalArn = $arns[1]
         RoleArn = $arns[0]
     }
+}
+
+Function Push-StringArrayValue{
+    [OutputType([System.Collections.Hashtable])]
+    [CmdletBinding()]
+    param(
+        [Array]$Array,
+        [String]$Match,
+        [String]$Value
+    )
+    $index = [array]::indexof($Array, ($Array | Where-Object {$_ -match $Match}))
+
+    if($index -ge 0){
+        $Array[$index] = $Value
+    }else{
+        $Array += $Value
+    }
+
+    return $Array
 }

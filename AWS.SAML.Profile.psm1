@@ -1,4 +1,5 @@
 using module .\AWS.SAML.Settings.psm1
+using module .\AWS.SAML.Utils.psm1
 
 function ConvertFrom-AWSCredential{
     [CmdletBinding()]
@@ -98,47 +99,39 @@ function Update-AWSProfile{
     )
 
     $file = Get-AWSCredentialFile
-    $profiles = ConvertFrom-AWSCredential -Content $file
+    $profile = ConvertFrom-AWSCredential -Content $file -LineMarkers | Where-Object {$_.Name -eq $ProfileName}
 
-    $currentProfile = $false
-
-    # Find Profile
-    for ($i = 0; $i -lt $file.Count; $i++) {
-        switch -regex ($file[$i]) {
-            '^\[.+\]$' {
-                $name = $file[$i].Trim('[]')
-                Write-Verbose "Found Profile: $name"
-
-                # Mark currentProfile to block accidental updating of other profiles.
-                if($name -eq $ProfileName){
-                    $currentProfile = $true
-                }else{
-                    $currentProfile = $false
-                }
-                break
-            }
-            '^aws_access_key_id' {
-                if($currentProfile){
-                    $file[$i] = "aws_access_key_id = $AccessKeyId"
-                }
-                break
-            }
-            '^aws_secret_access_key = ' {
-                if($currentProfile){
-                    $file[$i] = "aws_secret_access_key = $SecretAccessKey"
-                }
-                break
-            }
-            '^aws_session_token = ' {
-                if($currentProfile){
-                    $file[$i] = "aws_session_token = $SessionToken"
-                }
-                break
-            }
-        }
+    # Split lines on profile
+    if($profile.LineStart -gt 0){
+        $before = $file[0..($profile.LineStart -1)]
     }
 
-    $file | Set-Content -Path "$directory`credentials"
+    $content = $file[$profile.LineStart..$profile.LineEnd]
+
+    if($profile.LineEnd -lt $file.GetUpperBound(0)){
+        $after = $file[($profile.LineEnd + 1)..$file.GetUpperBound(0)]
+    }
+
+    # Remove whitespace
+    $content = $content | Where-Object {$_ -ne ''}
+
+    # Update Name - remove whitespace or other characters
+    $content[0] = "[$ProfileName]"
+    
+    # Update Access Key ID
+    $content = Push-StringArrayValue -Array $content -Match '^[\t ]*aws_access_key_id[\t ]*=' -Value "aws_access_key_id = $AccessKeyId"
+    
+    # Update Secret Access Key
+    $content = Push-StringArrayValue -Array $content -Match '^[\t ]*aws_secret_access_key[\t ]*=' -Value "aws_secret_access_key = $SecretAccessKey"
+
+    # Update Session Token
+    $content = Push-StringArrayValue -Array $content -Match '^[\t ]*aws_session_token[\t ]*=' -Value "aws_session_token = $SessionToken"
+
+    # Add blank line
+    $content += ''
+
+    # Save Changes
+    Save-AWSCredentialFile -FileContent ($before + $content + $after)
 }
 
 function New-AWSProfile{
@@ -151,11 +144,10 @@ function New-AWSProfile{
         [String]$SessionToken
     )
 
-    $directory = Get-AWSDirectory
-    $file = Get-Content -Path "$directory`credentials"
+    $file = Get-AWSCredentialFile
 
     # Add blank line if needed
-    if($file[-1] -ne ''){
+    if($file -ne '' -and $file[-1] -ne ''){
         $file += ''
     }
 
@@ -164,7 +156,7 @@ function New-AWSProfile{
     $file += "aws_secret_access_key = $SecretAccessKey"
     $file += "aws_session_token = $SessionToken"
 
-    $file | Set-Content -Path "$directory`credentials"
+    $file | Save-AWSCredentialFile
 }
 
 function Set-AWSProfile{
