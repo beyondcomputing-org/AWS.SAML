@@ -1,18 +1,12 @@
 function Add-AWSSTSCred{
     [CmdletBinding()]
     param(
-        $STS,
-        [Alias('Profile')]
-        [String]$ProfileName
+        $STS
     )
-    # Create Profile if requested
-    if($ProfileName){
-        Set-AWSProfile -ProfileName $ProfileName -AccessKeyId $STS.Credentials.AccessKeyId -SecretAccessKey $STS.Credentials.SecretAccessKey -SessionToken $STS.Credentials.SessionToken
-    }else{
-        $ENV:AWS_ACCESS_KEY_ID = $STS.Credentials.AccessKeyId
-        $ENV:AWS_SECRET_ACCESS_KEY = $STS.Credentials.SecretAccessKey
-        $ENV:AWS_SESSION_TOKEN = $STS.Credentials.SessionToken
-    }
+    
+    $ENV:AWS_ACCESS_KEY_ID = $STS.Credentials.AccessKeyId
+    $ENV:AWS_SECRET_ACCESS_KEY = $STS.Credentials.SecretAccessKey
+    $ENV:AWS_SESSION_TOKEN = $STS.Credentials.SessionToken
 }
 
 function Get-SAMLRole{

@@ -4,6 +4,7 @@ using module .\AWS.SAML.Utils.psm1
 function ConvertFrom-AWSCredential{
     [CmdletBinding()]
     param(
+        [Parameter(Mandatory=$true)]
         [Array]$Content,
         [Switch]$LineMarkers
     )
@@ -26,7 +27,7 @@ function ConvertFrom-AWSCredential{
                     SessionToken = ''
                 }
 
-                # Add Line markers to objects        
+                # Add Line markers to objects
                 if($LineMarkers){
                     # New Profile found - set end marker for previous
                     if($profiles){
@@ -62,7 +63,7 @@ function ConvertFrom-AWSCredential{
             }
         }
     }
-    
+
     # Finished profiles - set marker for last
     if($LineMarkers -and $profiles){
         $profiles[-1].LineEnd = $Content.count - 1
@@ -91,10 +92,13 @@ function Get-AWSProfile{
 function Update-AWSProfile{
     [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
     param(
-        [Alias('Profile')]
+        [Parameter(Mandatory=$true)]
         [String]$ProfileName,
+        [Parameter(Mandatory=$true)]
         [String]$AccessKeyId,
+        [Parameter(Mandatory=$true)]
         [String]$SecretAccessKey,
+        [Parameter(Mandatory=$true)]
         [String]$SessionToken
     )
 
@@ -117,10 +121,10 @@ function Update-AWSProfile{
 
     # Update Name - remove whitespace or other characters
     $content[0] = "[$ProfileName]"
-    
+
     # Update Access Key ID
     $content = Push-StringArrayValue -Array $content -Match '^[\t ]*aws_access_key_id[\t ]*=' -Value "aws_access_key_id = $AccessKeyId"
-    
+
     # Update Secret Access Key
     $content = Push-StringArrayValue -Array $content -Match '^[\t ]*aws_secret_access_key[\t ]*=' -Value "aws_secret_access_key = $SecretAccessKey"
 
@@ -131,16 +135,22 @@ function Update-AWSProfile{
     $content += ''
 
     # Save Changes
-    Save-AWSCredentialFile -FileContent ($before + $content + $after)
+    if ($pscmdlet.ShouldProcess('AWS Credential File', "Update Profile: $ProfileName"))
+    {
+        Save-AWSCredentialFile -FileContent ($before + $content + $after)
+    }
 }
 
 function New-AWSProfile{
     [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
     param(
-        [Alias('Profile')]
+        [Parameter(Mandatory=$true)]
         [String]$ProfileName,
+        [Parameter(Mandatory=$true)]
         [String]$AccessKeyId,
+        [Parameter(Mandatory=$true)]
         [String]$SecretAccessKey,
+        [Parameter(Mandatory=$true)]
         [String]$SessionToken
     )
 
@@ -156,16 +166,24 @@ function New-AWSProfile{
     $file += "aws_secret_access_key = $SecretAccessKey"
     $file += "aws_session_token = $SessionToken"
 
-    $file | Save-AWSCredentialFile
+    # Save Changes
+    if ($pscmdlet.ShouldProcess('AWS Credential File', "Add Profile: $ProfileName"))
+    {
+        $file | Save-AWSCredentialFile
+    }
 }
 
 function Set-AWSProfile{
     [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
     param(
+        [Parameter(Mandatory=$true)]
         [Alias('Profile')]
         [String]$ProfileName,
+        [Parameter(Mandatory=$true)]
         [String]$AccessKeyId,
+        [Parameter(Mandatory=$true)]
         [String]$SecretAccessKey,
+        [Parameter(Mandatory=$true)]
         [String]$SessionToken
     )
 

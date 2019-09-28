@@ -59,20 +59,21 @@ function Get-AWSDirectory{
 }
 
 function Get-AWSCredentialFile{
+    [OutputType([System.Object[]])]
     [CmdletBinding()]
     param(
     )
     $directory = Get-AWSDirectory
-    
+
     # Return the credential file or a blank string if it doesn't yet exist
     if(Test-Path $directory){
         if(Test-Path "$directory`credentials"){
             return Get-Content -Path "$directory`credentials"
         }else{
-            return ""
+            return @('')
         }
     }else{
-        return ""
+        return @('')
     }
 }
 
@@ -82,7 +83,7 @@ function Save-AWSCredentialFile{
         $FileContent
     )
     $directory = Get-AWSDirectory
-    
+
     # Create the folder if it doesn't exist
     if(!(Test-Path $directory)){
         New-Item -ItemType Directory $directory

@@ -1,6 +1,7 @@
 using module .\AWS.SAML.Browser.psm1
 using module .\AWS.SAML.Settings.psm1
 using module .\AWS.SAML.Utils.psm1
+using module .\AWS.SAML.Profile.psm1
 
 <#
     .SYNOPSIS
@@ -54,7 +55,13 @@ function New-AWSSAMLLogin {
         $sts = Use-STSRoleWithSAML -PrincipalArn $arns.PrincipalArn -RoleArn $arns.RoleArn -SAMLAssertion $samlAssertion
 
         # Store Credentials for use
-        Add-AWSSTSCred -STS $sts -ProfileName $ProfileName
+        if($ProfileName){
+            # Store in Profile
+            Set-AWSProfile -ProfileName $ProfileName -AccessKeyId $sts.Credentials.AccessKeyId -SecretAccessKey $sts.Credentials.SecretAccessKey -SessionToken $sts.Credentials.SessionToken
+        }else{
+            # Store in Environment Variable
+            Add-AWSSTSCred -STS $sts -ProfileName $ProfileName
+        }
 
         # Output Console Data
         Write-Output "Logged into account: $($consoleData.Alias)"
