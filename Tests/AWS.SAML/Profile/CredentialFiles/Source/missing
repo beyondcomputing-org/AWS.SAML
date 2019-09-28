@@ -1,0 +1,15 @@
+[Dev]
+aws_access_key_id = 123
+aws_secret_access_key = abc
+aws_session_token = 111
+
+[Test]
+aws_access_key_id = acb1d27b-de8c-48ee-98bd-0c74dda7f05
+
+
+
+
+[Prod]
+aws_access_key_id = 456
+aws_secret_access_key = def
+aws_session_token = 222

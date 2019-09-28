@@ -6,8 +6,8 @@ Describe 'Get-AWSSAMLURL' {
     $url = 'https://www.amazon.com'
 
     Mock Get-SaveDir -ModuleName AWS.SAML.Settings { 
-        return 'TestDrive:\aws.saml'
-    }
+        return $dir
+    }.GetNewClosure()
 
     Mock Save-AWSSAMLURL -ModuleName AWS.SAML.Settings { 
         Throw 'Error - Failed to find item in TestDrive'

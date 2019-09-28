@@ -1,5 +1,75 @@
 using module .\AWS.SAML.Settings.psm1
 
+function ConvertFrom-AWSCredential{
+    [CmdletBinding()]
+    param(
+        [Array]$Content,
+        [Switch]$LineMarkers
+    )
+
+    $profiles = @()
+
+    # Process each line and build credential object
+    for ($i = 0; $i -lt $Content.Count; $i++) {
+        $line = $Content[$i]
+        switch -regex ($line) {
+            '^[\t ]*\[.+\][\t ]*$' {
+                $name = $line.Trim('[] ')
+                Write-Verbose "Found Profile: $name"
+
+                # Create Object
+                $profile = [ordered]@{
+                    Name = $name
+                    AccessKeyId = ''
+                    SecretAccessKey = ''
+                    SessionToken = ''
+                }
+
+                # Add Line markers to objects        
+                if($LineMarkers){
+                    # New Profile found - set end marker for previous
+                    if($profiles){
+                        $profiles[-1].LineEnd = $i -1
+                    }
+
+                    $profile += [ordered]@{
+                        LineStart = $i
+                        LineEnd = $i
+                    }
+                }
+
+                $profiles += [pscustomobject]$profile
+                break
+            }
+            '^[\t ]*aws_access_key_id[\t ]*=' {
+                $aki = $line.Replace('aws_access_key_id', '').TrimStart(' =').TrimEnd()
+                Write-Verbose "Found Access Key ID: $aki"
+                $profiles[-1].AccessKeyId = $aki
+                break
+            }
+            '^[\t ]*aws_secret_access_key[\t ]*=' {
+                $sak = $line.Replace('aws_secret_access_key', '').TrimStart(' =').TrimEnd()
+                Write-Verbose "Found Secret Access Key: $sak"
+                $profiles[-1].SecretAccessKey = $sak
+                break
+            }
+            '^[\t ]*aws_session_token[\t ]*=' {
+                $st = $line.Replace('aws_session_token', '').TrimStart(' =').TrimEnd()
+                Write-Verbose "Found Session Token: $st"
+                $profiles[-1].SessionToken = $st
+                break
+            }
+        }
+    }
+    
+    # Finished profiles - set marker for last
+    if($LineMarkers -and $profiles){
+        $profiles[-1].LineEnd = $Content.count - 1
+    }
+
+    return $profiles
+}
+
 function Get-AWSProfile{
     [CmdletBinding()]
     param(
@@ -7,47 +77,8 @@ function Get-AWSProfile{
         [String]$ProfileName
     )
 
-    $directory = Get-AWSDirectory
-    $file = Get-Content -Path "$directory`credentials"
-
-    $profiles = @()
-
-    # Process each line and build credential object
-    foreach ($line in $file) {
-        switch -regex ($line) {
-            '^\[.+\]$' {
-                $name = $line.Trim('[]')
-                Write-Verbose "Found Profile: $name"
-
-                $profile = [pscustomobject][ordered]@{
-                    Name = $name
-                    AccessKeyId = ''
-                    SecretAccessKey = ''
-                    SessionToken = ''
-                }
-                $profiles += $profile
-                break
-            }
-            '^aws_access_key_id' {
-                $aki = $line.Replace('aws_access_key_id = ', '')
-                Write-Verbose "Found Access Key ID: $aki"
-                $profiles[-1].AccessKeyId = $aki
-                break
-            }
-            '^aws_secret_access_key = ' {
-                $sak = $line.Replace('aws_secret_access_key =', '')
-                Write-Verbose "Found Secret Access Key: $sak"
-                $profiles[-1].SecretAccessKey = $sak
-                break
-            }
-            '^aws_session_token = ' {
-                $st = $line.Replace('aws_session_token =', '')
-                Write-Verbose "Found Session Token: $st"
-                $profiles[-1].SessionToken = $st
-                break
-            }
-        }
-    }
+    $file = Get-AWSCredentialFile
+    $profiles = ConvertFrom-AWSCredential -Content $file
 
     if($ProfileName){
         return ($profiles | Where-Object {$_.Name -eq $ProfileName})
@@ -66,8 +97,8 @@ function Update-AWSProfile{
         [String]$SessionToken
     )
 
-    $directory = Get-AWSDirectory
-    $file = Get-Content -Path "$directory`credentials"
+    $file = Get-AWSCredentialFile
+    $profiles = ConvertFrom-AWSCredential -Content $file
 
     $currentProfile = $false
 

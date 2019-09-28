@@ -1,0 +1,15 @@
+[Dev]
+aws_access_key_id = 123
+aws_secret_access_key = abc
+aws_session_token = 111
+
+[Test]
+aws_access_key_id = acb1d27b-de8c-48ee-98bd-0c74dda7f05
+aws_secret_access_key = 2b6fcc36-e80e-4968-82f8-b88d088741cd
+aws_session_token = 5a477223-058a-4597-ab73-0a9100efb0755a477223-058a-4597-ab73-0a9100efb0755a477223-058a-4597-ab73-0a9100efb0755a477223-058a-4597-ab73-0a9100efb0755a477223-058a-4597-ab73-0a9100efb075==
+extra = stuff
+
+[Prod]
+aws_access_key_id = 456
+aws_secret_access_key = def
+aws_session_token = 222

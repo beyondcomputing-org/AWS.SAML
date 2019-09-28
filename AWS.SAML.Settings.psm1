@@ -57,3 +57,40 @@ function Get-AWSDirectory{
         return "${env:\userprofile}\.aws\"
     }
 }
+
+function Get-AWSCredentialFile{
+    [CmdletBinding()]
+    param(
+    )
+    $directory = Get-AWSDirectory
+    
+    # Return the credential file or a blank string if it doesn't yet exist
+    if(Test-Path $directory){
+        if(Test-Path "$directory`credentials"){
+            return Get-Content -Path "$directory`credentials"
+        }else{
+            return ""
+        }
+    }else{
+        return ""
+    }
+}
+
+function Save-AWSCredentialFile{
+    [CmdletBinding()]
+    param(
+        $FileContent
+    )
+    $directory = Get-AWSDirectory
+    
+    # Create the folder if it doesn't exist
+    if(!(Test-Path $directory)){
+        New-Item -ItemType Directory $directory
+    }
+
+    if(!(Test-Path "$directory`credentials")){
+        New-Item -ItemType File "$directory`credentials"
+    }
+
+    $FileContent | Set-Content -Path "$directory`credentials" -Encoding UTF8
+}

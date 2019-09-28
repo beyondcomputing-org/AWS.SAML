@@ -6,12 +6,12 @@ Describe 'Save-AWSSAMLURL' {
     $url = 'https://www.amazon.com'
     
     Mock Get-SaveDir -ModuleName AWS.SAML.Settings { 
-        return 'TestDrive:\aws.saml'
-    }
+        return $dir
+    }.GetNewClosure()
     
     Mock Read-Host -ModuleName AWS.SAML.Settings { 
-        return 'https://www.amazon.com'
-    }
+        return $url
+    }.GetNewClosure()
 
     Context 'Saves out the URL' {
         Save-AWSSAMLURL
