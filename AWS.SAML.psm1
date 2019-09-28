@@ -73,3 +73,19 @@ function New-AWSSAMLLogin {
         }
     }
 }
+
+function Get-AWSSAMLCredential {
+    param(
+        [Alias('Profile')]
+        [String]$ProfileName
+    )
+    $response = Login-AWSSAML
+
+    Return [PSCustomObject]@{
+        Version = 1
+        AccessKeyId = ''
+        SecretAccessKey = ''
+        SessionToken = ''
+        Expiration = $response.Expires.ToString('o')
+      } | ConvertTo-Json -Compress
+}
