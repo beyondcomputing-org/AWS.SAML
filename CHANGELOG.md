@@ -4,6 +4,11 @@
 *These will be removed in the next major release*
 - N/A
 
+0.7.1
+-----
+- Added ~100 tests to profile management
+- Rewrote profile code to allow for easier testing and address corner cases / bugs
+
 0.7.0
 -----
 - Added basic profile support
