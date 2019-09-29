@@ -17,7 +17,7 @@ Describe 'Get-AWSProfile' {
     )
 
     Mock Get-AWSCredentialFile -ModuleName AWS.SAML.Profile { 
-        return ''
+        return 'data'
     }
 
     Mock ConvertFrom-AWSCredential -ModuleName AWS.SAML.Profile { 

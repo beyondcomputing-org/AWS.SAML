@@ -3,12 +3,18 @@ using module .\AWS.SAML.Settings.psm1
 function Get-ConsoleData{
     [CmdletBinding()]
     param(
-        $Driver
+        $Driver,
+        $Timeout = 60000
     )
     # Wait for user to complete login process
-    Write-Progress 'Please select the role that you would like to use and login to the console.'
     do {
-        Start-Sleep -Milliseconds 100
+        Write-Progress 'Please select the role that you would like to use and login to the console.' -SecondsRemaining ($Timeout/1000)
+        if($Timeout -gt 0){
+            Start-Sleep -Milliseconds 100
+            $Timeout -= 100
+        }else{
+            Throw "Exceeded timeout of $Timeout ms waiting for user to select role and login"
+        }
     } until ($Driver.Title -eq 'AWS Management Console')
 
     # Getting Data from Cookies
@@ -38,13 +44,19 @@ function Get-CookieData{
 function Get-SAMLAssertion {
     [CmdletBinding()]
     param(
-        $Driver
+        $Driver,
+        $Timeout = 60000
     )
 
     # Wait for SAML Form
-    Write-Progress 'Please login to the console.  Once you login we will pull the SAML Assertion.'
     do {
-        Start-Sleep -Milliseconds 100
+        Write-Progress 'Please login to the console.  Once you login we will pull the SAML Assertion.' -SecondsRemaining ($Timeout/1000)
+        if($Timeout -gt 0){
+            Start-Sleep -Milliseconds 100
+            $Timeout -= 100
+        }else{
+            Throw "Exceeded timeout of $Timeout ms waiting for browser to load AWS SAML page"
+        }
     } until ($Driver.url -eq 'https://signin.aws.amazon.com/saml')
 
     Write-Progress 'Extracting SAML Assertion'
@@ -58,7 +70,8 @@ function Start-Browser {
         [String]$InitURL,
         [ValidateSet('Chrome', 'Firefox', 'Edge', 'IE')]
         [String]$Browser,
-        [Switch]$NoProfile
+        [Switch]$NoProfile,
+        [Switch]$Headless
     )
 
     if ($pscmdlet.ShouldProcess($Browser, 'start'))
@@ -81,7 +94,18 @@ function Start-Browser {
                 if($NoProfile){
                     $Driver = Start-SeChrome -Arguments @("--app=$InitURL")
                 }else{
-                    $Driver = Start-SeChrome -ProfileDirectoryPath "$(Get-SaveDir)\Chrome" -Arguments @("--app=$InitURL")
+                    if($Headless){
+                        # TODO: Headless chrome isn't working with the profile path.  Need to address or load in cookies for Auth.
+                        # the -Headless flag is currently not enabled on Start-SeChrome
+
+                        # The following closed bugs should allow the functionality we need
+                        # https://bugs.chromium.org/p/chromium/issues/detail?id=775703
+                        # https://bugs.chromium.org/p/chromium/issues/detail?id=617931
+
+                        $Driver = Start-SeChrome -ProfileDirectoryPath "$(Get-SaveDir)\Chrome" -Arguments @("--app=$InitURL")
+                    }else{
+                        $Driver = Start-SeChrome -ProfileDirectoryPath "$(Get-SaveDir)\Chrome" -Arguments @("--app=$InitURL")
+                    }
                 }
             }
         }

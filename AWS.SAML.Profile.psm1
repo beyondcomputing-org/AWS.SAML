@@ -25,6 +25,8 @@ function ConvertFrom-AWSCredential{
                     AccessKeyId = ''
                     SecretAccessKey = ''
                     SessionToken = ''
+                    AccountID = ''
+                    Role = ''
                 }
 
                 # Add Line markers to objects
@@ -61,6 +63,18 @@ function ConvertFrom-AWSCredential{
                 $profiles[-1].SessionToken = $st
                 break
             }
+            '^[\t ]*aws_saml_accountid[\t ]*=' {
+                $ai = $line.Replace('aws_saml_accountid', '').TrimStart(' =').TrimEnd()
+                Write-Verbose "Found AccountID: $ai"
+                $profiles[-1].AccountID = $ai
+                break
+            }
+            '^[\t ]*aws_saml_role[\t ]*=' {
+                $r = $line.Replace('aws_saml_role', '').TrimStart(' =').TrimEnd()
+                Write-Verbose "Found Role: $r"
+                $profiles[-1].Role = $r
+                break
+            }
         }
     }
 
@@ -80,12 +94,17 @@ function Get-AWSProfile{
     )
 
     $file = Get-AWSCredentialFile
-    $profiles = ConvertFrom-AWSCredential -Content $file
+    if($file){
+        $profiles = ConvertFrom-AWSCredential -Content $file
 
-    if($ProfileName){
-        return ($profiles | Where-Object {$_.Name -eq $ProfileName})
+        if($ProfileName){
+            return ($profiles | Where-Object {$_.Name -eq $ProfileName})
+        }else{
+            return $profiles
+        }
     }else{
-        return $profiles
+        Write-Verbose 'No Profiles Found'
+        return $null
     }
 }
 
@@ -99,11 +118,24 @@ function Update-AWSProfile{
         [Parameter(Mandatory=$true)]
         [String]$SecretAccessKey,
         [Parameter(Mandatory=$true)]
-        [String]$SessionToken
+        [String]$SessionToken,
+        [Parameter(Mandatory=$true)]
+        [String]$AccountID,
+        [Parameter(Mandatory=$true)]
+        [String]$Role
     )
 
     $file = Get-AWSCredentialFile
+
+    if(!($file)){
+        Throw 'No Profiles available to Update'
+    }
+
     $profile = ConvertFrom-AWSCredential -Content $file -LineMarkers | Where-Object {$_.Name -eq $ProfileName}
+
+    if(!($profile)){
+        Throw "Profile: $ProfileName not found"
+    }
 
     # Split lines on profile
     if($profile.LineStart -gt 0){
@@ -131,6 +163,12 @@ function Update-AWSProfile{
     # Update Session Token
     $content = Push-StringArrayValue -Array $content -Match '^[\t ]*aws_session_token[\t ]*=' -Value "aws_session_token = $SessionToken"
 
+    # Update Account ID
+    $content = Push-StringArrayValue -Array $content -Match '^[\t ]*aws_saml_accountid[\t ]*=' -Value "aws_saml_accountid = $AccountID"
+
+    # Update Role
+    $content = Push-StringArrayValue -Array $content -Match '^[\t ]*aws_saml_role[\t ]*=' -Value "aws_saml_role = $Role"
+
     # Add blank line
     $content += ''
 
@@ -151,13 +189,18 @@ function New-AWSProfile{
         [Parameter(Mandatory=$true)]
         [String]$SecretAccessKey,
         [Parameter(Mandatory=$true)]
-        [String]$SessionToken
+        [String]$SessionToken,
+        [Parameter(Mandatory=$true)]
+        [String]$AccountID,
+        [Parameter(Mandatory=$true)]
+        [String]$Role
     )
 
-    $file = Get-AWSCredentialFile
+    # Must set return type as array to handle null values
+    [Array]$file = Get-AWSCredentialFile
 
     # Add blank line if needed
-    if($file -ne '' -and $file[-1] -ne ''){
+    if($file -and $file[-1] -ne ''){
         $file += ''
     }
 
@@ -165,11 +208,13 @@ function New-AWSProfile{
     $file += "aws_access_key_id = $AccessKeyId"
     $file += "aws_secret_access_key = $SecretAccessKey"
     $file += "aws_session_token = $SessionToken"
+    $file += "aws_saml_accountid = $AccountID"
+    $file += "aws_saml_role = $Role"
 
     # Save Changes
     if ($pscmdlet.ShouldProcess('AWS Credential File', "Add Profile: $ProfileName"))
     {
-        $file | Save-AWSCredentialFile
+        Save-AWSCredentialFile -FileContent $file
     }
 }
 
@@ -184,12 +229,16 @@ function Set-AWSProfile{
         [Parameter(Mandatory=$true)]
         [String]$SecretAccessKey,
         [Parameter(Mandatory=$true)]
-        [String]$SessionToken
+        [String]$SessionToken,
+        [Parameter(Mandatory=$true)]
+        [String]$AccountID,
+        [Parameter(Mandatory=$true)]
+        [String]$Role
     )
 
     if(Get-AWSProfile -ProfileName $ProfileName){
-        Update-AWSProfile -Profile $ProfileName -AccessKeyId $AccessKeyId -SecretAccessKey $SecretAccessKey -SessionToken $SessionToken
+        Update-AWSProfile -Profile $ProfileName -AccessKeyId $AccessKeyId -SecretAccessKey $SecretAccessKey -SessionToken $SessionToken -AccountID $AccountID -Role $Role
     }else{
-        New-AwsProfile -Profile $ProfileName -AccessKeyId $AccessKeyId -SecretAccessKey $SecretAccessKey -SessionToken $SessionToken
+        New-AwsProfile -Profile $ProfileName -AccessKeyId $AccessKeyId -SecretAccessKey $SecretAccessKey -SessionToken $SessionToken -AccountID $AccountID -Role $Role
     }
 }

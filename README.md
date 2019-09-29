@@ -18,6 +18,16 @@ In a PowerShell window run the following command to authenticate your CLI sessio
 ```powershell
 Login-AWSSAML
 ```
+#### Using Profiles
+In a PowerShell window run the following command to create an AWS profile for use in the CLI.  You can create as many profiles as you want.
+```powershell
+Login-AWSSAML -ProfileName 'Name'
+```
+
+When you need to refresh the credentials for any saved profiles just run the following command.  If you have multiple profiles created it will refresh tokens for all of them unless you specify a profile name.
+```powershell
+Update-AWSSAMLLogin
+```
 
 ### SSO Initiation URL
 The Initiation URL is the URL that you would login to start the SSO process.  This is the URL provided by your IT team or the first URL that your SSO App Launcher takes you to.
@@ -30,6 +40,7 @@ To get more information on each cmdlet run `Get-Help <CMDLET Name>`
 
 #### Authentication CMDLETs
 - Login-AWSSAML
+- Update-AWSSAMLLogin
 
 ### Browsers
 The module can support the following Browsers: Chrome, FireFox, Edge and IE.  Chrome is the default as has been tested.  If you are using another browser and have issues, please report them and preferably submit a PR.

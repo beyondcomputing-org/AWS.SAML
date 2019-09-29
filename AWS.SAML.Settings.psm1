@@ -59,7 +59,7 @@ function Get-AWSDirectory{
 }
 
 function Get-AWSCredentialFile{
-    [OutputType([System.Object[]])]
+    [OutputType([Array])]
     [CmdletBinding()]
     param(
     )
@@ -70,10 +70,10 @@ function Get-AWSCredentialFile{
         if(Test-Path "$directory`credentials"){
             return Get-Content -Path "$directory`credentials"
         }else{
-            return @('')
+            return $null
         }
     }else{
-        return @('')
+        return $null
     }
 }
 

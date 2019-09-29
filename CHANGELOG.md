@@ -6,8 +6,9 @@
 
 0.8.0
 -----
+- Added new cmdlet `Update-AWSSAMLLogin`
 - Fixed bug when not specifying profile
-- Updated output to be an object
+- Other bug fixes and enhancements
 
 0.7.1
 -----
