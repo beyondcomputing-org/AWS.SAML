@@ -4,6 +4,14 @@
 *These will be removed in the next major release*
 - N/A
 
+0.9.0
+-----
+- Requiring version 6+ of powershell.  All testing is happening on version 6+ and a few issues have been found when using version 5.
+- Explicitly setting credential file to UTF-8 NoBOM
+- Bumping Selenium module to version 2.1
+- Cleanup help files
+- Improve test speed by rewriting Script Analyzer Tests
+
 0.8.0
 -----
 - Added new cmdlet `Update-AWSSAMLLogin`

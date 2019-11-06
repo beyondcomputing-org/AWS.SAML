@@ -93,5 +93,5 @@ function Save-AWSCredentialFile{
         New-Item -ItemType File "$directory`credentials"
     }
 
-    $FileContent | Set-Content -Path "$directory`credentials" -Encoding UTF8
+    $FileContent | Set-Content -Path "$directory`credentials" -Encoding utf8NoBOM
 }

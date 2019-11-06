@@ -12,7 +12,7 @@
     RootModule        = 'AWS.SAML.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '0.8.0'
+    ModuleVersion     = '0.9.0'
 
     # Supported PSEditions
     # CompatiblePSEditions = @('Desktop', 'Core')
@@ -33,7 +33,7 @@
     Description       = 'Provides CLI Access to AWS using SAML authentication in a browser.'
 
     # Minimum version of the PowerShell engine required by this module
-    PowerShellVersion = '5.0'
+    PowerShellVersion = '6.0'
 
     # Name of the PowerShell host required by this module
     # PowerShellHostName = ''
@@ -52,7 +52,7 @@
 
     # Modules that must be imported into the global environment prior to importing this module
     RequiredModules = @(
-        @{ModuleName="Selenium"; ModuleVersion="2.0"; Guid="a3bdb8c3-c150-48a8-b56d-cd4d43f46a26"},
+        @{ModuleName="Selenium"; ModuleVersion="2.1"; Guid="a3bdb8c3-c150-48a8-b56d-cd4d43f46a26"},
         @{ModuleName="AWS.Tools.SecurityToken"; ModuleVersion="3.3.563.1"; Guid="b760f2e8-291f-4df4-bd69-3a615b47c8d4"}
     )
     # Assemblies that must be loaded prior to importing this module
