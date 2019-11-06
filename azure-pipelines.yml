@@ -3,8 +3,8 @@ jobs:
     pool:
       vmImage: vs2017-win2016
     steps:
-    - powershell: |
-        .\Build.ps1 -NonInteractive -NoLogo -NoProfile
+    - script: |
+        pwsh -c '.\Build.ps1' -NonInteractive -NoLogo -NoProfile
       displayName: 'Test'
 
     - task: PublishTestResults@2
@@ -32,12 +32,14 @@ jobs:
     pool:
       vmImage: ubuntu-16.04
     steps:
-    - script: |
-        curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-        curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list | sudo tee /etc/apt/sources.list.d/microsoft.list
-        sudo apt-get update
-        sudo apt-get install -y powershell
-      displayName: 'Install PowerShell Core'
+
+    # Images are supposed to include PSCore now
+    # - script: |
+    #     curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+    #     curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list | sudo tee /etc/apt/sources.list.d/microsoft.list
+    #     sudo apt-get update
+    #     sudo apt-get install -y powershell
+    #   displayName: 'Install PowerShell Core'
  
     - script: |
         pwsh -c '.\Build.ps1' -NonInteractive -NoLogo -NoProfile
@@ -55,11 +57,13 @@ jobs:
     pool:
       vmImage: xcode9-macos10.13
     steps:
-    - script: |
-        brew update
-        brew tap caskroom/cask
-        brew cask install powershell
-      displayName: 'Install PowerShell Core'
+    
+    # Images are supposed to include PSCore now
+    # - script: |
+    #     brew update
+    #     brew tap caskroom/cask
+    #     brew cask install powershell
+    #   displayName: 'Install PowerShell Core'
  
     - script: |
         pwsh -c '.\Build.ps1' -NonInteractive -NoLogo -NoProfile
