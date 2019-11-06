@@ -3,8 +3,8 @@ jobs:
     pool:
       vmImage: vs2017-win2016
     steps:
-    - script: |
-        pwsh -c '.\Build.ps1' -NonInteractive -NoLogo -NoProfile
+    - pwsh: |
+        .\Build.ps1 -NonInteractive -NoLogo -NoProfile
       displayName: 'Test'
 
     - task: PublishTestResults@2
