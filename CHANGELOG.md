@@ -4,6 +4,11 @@
 *These will be removed in the next major release*
 - N/A
 
+1.0.0
+-----
+- Bumping Selenium module to version 2.3.1
+- Bumping AWS.Tools.SecurityToken to version 4.0.2.0
+
 0.9.0
 -----
 - Requiring version 6+ of powershell.  All testing is happening on version 6+ and a few issues have been found when using version 5.
