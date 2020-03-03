@@ -21,6 +21,9 @@ using module .\AWS.SAML.Profile.psm1
 
     .PARAMETER ProfileName
         When specified the credentials are saved as an AWS profile under the specified name for use in the CLI
+
+    .PARAMETER SessionDuration
+        When specified your role session lasts for the specified duration in seconds. By default, the value is set to 3600 seconds.
 #>
 function New-AWSSAMLLogin {
     [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
@@ -31,7 +34,8 @@ function New-AWSSAMLLogin {
         [String]$Browser = 'Chrome',
         [Switch]$NoBrowserProfile,
         [Alias('Profile')]
-        [String]$ProfileName
+        [String]$ProfileName,
+        [Int]$SessionDuration = 3600
     )
     if ($pscmdlet.ShouldProcess('AWS SAML', 'login'))
     {
@@ -55,7 +59,7 @@ function New-AWSSAMLLogin {
         $arns = Get-SAMLRole -Assertion $samlAssertion -AccountID $consoleData.AccountID -Role $consoleData.Role
 
         # Get STS Credentials with SAML
-        $sts = Use-STSRoleWithSAML -PrincipalArn $arns.PrincipalArn -RoleArn $arns.RoleArn -SAMLAssertion $samlAssertion
+        $sts = Use-STSRoleWithSAML -PrincipalArn $arns.PrincipalArn -RoleArn $arns.RoleArn -SAMLAssertion $samlAssertion -DurationInSeconds $SessionDuration
 
         # Store Credentials for use
         if($ProfileName){
@@ -92,6 +96,9 @@ function New-AWSSAMLLogin {
 
     .PARAMETER ProfileName
         When specified the credentials are saved as an AWS profile under the specified name for use in the CLI
+
+    .PARAMETER SessionDuration
+        When specified your role session lasts for the specified duration in seconds. By default, the value is set to 3600 seconds.
 #>
 function Update-AWSSAMLLogin {
     [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
@@ -99,7 +106,8 @@ function Update-AWSSAMLLogin {
         [ValidateSet('Chrome', 'Firefox', 'Edge', 'IE')]
         [String]$Browser = 'Chrome',
         [Alias('Profile')]
-        [String]$ProfileName
+        [String]$ProfileName,
+        [Int]$SessionDuration = 3600
     )
     if ($pscmdlet.ShouldProcess('AWS SAML', 'update'))
     {
@@ -130,7 +138,7 @@ function Update-AWSSAMLLogin {
                 $arns = Get-SAMLRole -Assertion $samlAssertion -AccountID $profile.AccountID -Role $profile.Role
 
                 # Get STS Credentials with SAML
-                $sts = Use-STSRoleWithSAML -PrincipalArn $arns.PrincipalArn -RoleArn $arns.RoleArn -SAMLAssertion $samlAssertion
+                $sts = Use-STSRoleWithSAML -PrincipalArn $arns.PrincipalArn -RoleArn $arns.RoleArn -SAMLAssertion $samlAssertion -DurationInSeconds $SessionDuration
 
                 # Update Profile
                 Set-AWSProfile -ProfileName $profile.Name -AccessKeyId $sts.Credentials.AccessKeyId -SecretAccessKey $sts.Credentials.SecretAccessKey -SessionToken $sts.Credentials.SessionToken -AccountID $profile.AccountID -Role $profile.Role

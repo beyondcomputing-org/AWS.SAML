@@ -25,6 +25,11 @@ In a PowerShell window run the following command to create an AWS profile for us
 Login-AWSSAML -ProfileName 'Name'
 ```
 
+You can specify a different session duration.
+```powershell
+Login-AWSSAML -SessionDuration 43200
+```
+
 When you need to refresh the credentials for any saved profiles just run the following command.  If you have multiple profiles created it will refresh tokens for all of them unless you specify a profile name.
 ```powershell
 Update-AWSSAMLLogin

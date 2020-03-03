@@ -4,6 +4,10 @@
 *These will be removed in the next major release*
 - N/A
 
+1.1.0
+-----
+- Added configurable session duration support
+
 1.0.0
 -----
 - Bumping Selenium module to version 2.3.1
