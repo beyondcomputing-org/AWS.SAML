@@ -4,6 +4,10 @@
 *These will be removed in the next major release*
 - N/A
 
+1.3.0
+-----
+- Added auto update support for chrome drivers on Windows
+
 1.2.0
 -----
 - Added configurable session duration to the Profile

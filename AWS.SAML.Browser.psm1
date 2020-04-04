@@ -1,4 +1,5 @@
 using module .\AWS.SAML.Settings.psm1
+using module .\AWS.SAML.ChromeDriver.psm1
 
 function Get-ConsoleData{
     [CmdletBinding()]
@@ -60,7 +61,7 @@ function Get-SAMLAssertion {
     } until ($Driver.url -eq 'https://signin.aws.amazon.com/saml')
 
     Write-Progress 'Extracting SAML Assertion'
-    $Element = Find-SeElement -name 'SAMLResponse' -Driver $Driver
+    $Element = Get-SeElement -name 'SAMLResponse' -Driver $Driver
     return Get-SeElementAttribute -Element $Element -Attribute 'Value'
 }
 
@@ -91,22 +92,39 @@ function Start-Browser {
                 $Driver = Start-SeInternetExplorer -StartURL $InitURL
             }
             Default {
-                if($NoProfile){
-                    $Driver = Start-SeChrome -Arguments @("--app=$InitURL")
-                }else{
-                    if($Headless){
-                        # TODO: Headless chrome isn't working with the profile path.  Need to address or load in cookies for Auth.
-                        # the -Headless flag is currently not enabled on Start-SeChrome
+                $Arguments = @{
+                    Arguments = @("--app=$InitURL")
+                }
 
-                        # The following closed bugs should allow the functionality we need
-                        # https://bugs.chromium.org/p/chromium/issues/detail?id=775703
-                        # https://bugs.chromium.org/p/chromium/issues/detail?id=617931
+                # Manage Chrome Driver Version
+                try{
+                    $driverPath = Get-ChromeDriverNeeded
+                    $driverDirectory = Split-Path $driverPath -Parent
+                    $Arguments += @{
+                        WebDriverDirectory = $driverDirectory
+                    }
+                }catch{
+                    Write-Warning "Error: $_"
+                    Write-Warning 'Failed to auto update chrome driver.  Using default driver instead.'
+                }
 
-                        $Driver = Start-SeChrome -ProfileDirectoryPath "$(Get-SaveDir)\Chrome" -Arguments @("--app=$InitURL")
-                    }else{
-                        $Driver = Start-SeChrome -ProfileDirectoryPath "$(Get-SaveDir)\Chrome" -Arguments @("--app=$InitURL")
+                # Add Profile
+                if(!($NoProfile)){
+                    $Arguments += @{
+                        ProfileDirectoryPath = "$(Get-SaveDir)\Chrome"
                     }
                 }
+
+                if($Headless){
+                    # TODO: Headless chrome isn't working with the profile path.  Need to address or load in cookies for Auth.
+                    # the -Headless flag is currently not enabled on Start-SeChrome
+
+                    # The following closed bugs should allow the functionality we need
+                    # https://bugs.chromium.org/p/chromium/issues/detail?id=775703
+                    # https://bugs.chromium.org/p/chromium/issues/detail?id=617931
+                }
+
+                $Driver = Start-SeChrome @Arguments
             }
         }
 
