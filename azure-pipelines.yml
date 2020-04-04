@@ -1,7 +1,7 @@
 jobs:
-  - job: Build_PS_Win2016
+  - job: Build_PS_Windows
     pool:
-      vmImage: vs2017-win2016
+      vmImage: windows-latest
     steps:
     - pwsh: |
         .\Build.ps1 -NonInteractive -NoLogo -NoProfile
@@ -13,7 +13,7 @@ jobs:
       inputs:
         testRunner: 'NUnit'
         testResultsFiles: '**/TestResults.xml'
-        testRunTitle: 'PS_Win2016'
+        testRunTitle: 'PS_WinLatest'
 
     - task: ArchiveFiles@2
       displayName: 'Archive Build'
@@ -28,19 +28,10 @@ jobs:
         ArtifactName: 'drop'
         publishLocation: 'Container'
 
-  - job: Build_PSCore_Ubuntu1604
+  - job: Build_PSCore_Ubuntu
     pool:
-      vmImage: ubuntu-16.04
+      vmImage: ubuntu-latest
     steps:
-
-    # Images are supposed to include PSCore now
-    # - script: |
-    #     curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-    #     curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list | sudo tee /etc/apt/sources.list.d/microsoft.list
-    #     sudo apt-get update
-    #     sudo apt-get install -y powershell
-    #   displayName: 'Install PowerShell Core'
- 
     - script: |
         pwsh -c '.\Build.ps1' -NonInteractive -NoLogo -NoProfile
       displayName: 'Test'
@@ -49,22 +40,14 @@ jobs:
       inputs:
         testRunner: 'NUnit'
         testResultsFiles: '**/TestResults.xml'
-        testRunTitle: 'PSCore_Ubuntu1604'
+        testRunTitle: 'PSCore_Ubuntu'
       condition: always()
       displayName: 'Publish Test Results'
  
-  - job: Build_PSCore_MacOS1013
+  - job: Build_PSCore_Mac
     pool:
-      vmImage: xcode9-macos10.13
+      vmImage: macOS-latest
     steps:
-    
-    # Images are supposed to include PSCore now
-    # - script: |
-    #     brew update
-    #     brew tap caskroom/cask
-    #     brew cask install powershell
-    #   displayName: 'Install PowerShell Core'
- 
     - script: |
         pwsh -c '.\Build.ps1' -NonInteractive -NoLogo -NoProfile
       displayName: 'Test'
@@ -73,6 +56,6 @@ jobs:
       inputs:
         testRunner: 'NUnit'
         testResultsFiles: '**/TestResults.xml'
-        testRunTitle: 'PSCore_MacOS1013'
+        testRunTitle: 'PSCore_MacOS'
       condition: always()
       displayName: 'Publish Test Results'
