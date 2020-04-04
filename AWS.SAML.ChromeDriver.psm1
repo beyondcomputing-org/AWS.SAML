@@ -2,6 +2,7 @@ using module .\AWS.SAML.Settings.psm1
 
 function Get-ChromeDriverNeeded{
     [CmdletBinding()]
+    [OutputType([String])]
     param(
     )
 
@@ -11,6 +12,7 @@ function Get-ChromeDriverNeeded{
 
 function Get-ChromeVersion {
     [CmdletBinding()]
+    [OutputType([String])]
     param(
     )
     switch ($true) {
@@ -29,11 +31,12 @@ function Get-ChromeVersion {
         Default {
             Throw 'Not able to detect the platform being used.  Make sure you are using an updated version of PowerShell.'
         }
-    }    
+    }
 }
 
 function Get-ChromeDriverPathByVersion {
     [CmdletBinding()]
+    [OutputType([String])]
     param(
         [Parameter(Mandatory=$true)]
         [String]$ChromeVersion
@@ -69,7 +72,7 @@ function Install-ChromeDriver{
         [Parameter(Mandatory=$true)]
         [String]$ChromeVersion
     )
-   
+
     # Get Driver Details
     $DriverFolder = Get-ChromeDriverFolder
     $DriverVersion = Get-ChromeDriverVersionByChromeVersion -ChromeVersion $ChromeVersion
@@ -82,6 +85,7 @@ function Install-ChromeDriver{
 
 function Invoke-ChromeDriverDownload {
     [CmdletBinding()]
+    [OutputType([String])]
     param(
         [Parameter(Mandatory=$true)]
         [String]$DriverFolder,
@@ -100,6 +104,7 @@ function Invoke-ChromeDriverDownload {
 
 function Get-ChromeDriverVersionByChromeVersion {
     [CmdletBinding()]
+    [OutputType([String])]
     param(
         [Parameter(Mandatory=$true)]
         [String]$ChromeVersion
@@ -112,6 +117,7 @@ function Get-ChromeDriverVersionByChromeVersion {
 
 function Get-ChromeDriverFolder {
     [CmdletBinding()]
+    [OutputType([String])]
     param(
     )
     $directory = "$(Get-SaveDir)\ChromeDrivers"
@@ -126,6 +132,7 @@ function Get-ChromeDriverFolder {
 
 function Select-ChromeVersionForDriver {
     [CmdletBinding()]
+    [OutputType([String])]
     param(
         [Parameter(Mandatory=$true)]
         [String]$ChromeVersion
@@ -137,6 +144,7 @@ function Select-ChromeVersionForDriver {
 
 function Get-ChromeDriverName {
     [CmdletBinding()]
+    [OutputType([String])]
     param(
     )
 
