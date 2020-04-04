@@ -30,7 +30,7 @@ Describe 'Update-AWSProfile' {
         }.GetNewClosure()
 
         Context "Output from Source File: [$($test.SourceFile)] matches Answer File: [$($test.AnswerFile)]" {
-            Update-AWSProfile -ProfileName 'Test' -AccessKeyId 'ff19-5d55' -SecretAccessKey '4cd2-b6da' -SessionToken '8406-ad68' -AccountID '123' -Role 'user'
+            Update-AWSProfile -ProfileName 'Test' -AccessKeyId 'ff19-5d55' -SecretAccessKey '4cd2-b6da' -SessionToken '8406-ad68' -AccountID '123' -Role 'user' -SessionDuration 600
             $answer = Get-Content -Path ".\Tests\AWS.SAML\Profile\CredentialFiles\Answer\$($test.AnswerFile)"
             $output = Get-Content -Path 'TestDrive:\output'
             
@@ -56,7 +56,7 @@ Describe 'Update-AWSProfile' {
                 return $null
             }
 
-            {Update-AWSProfile -ProfileName 'Test' -AccessKeyId 'ff19-5d55' -SecretAccessKey '4cd2-b6da' -SessionToken '8406-ad68' -AccountID '123' -Role 'user'} | Should -Throw
+            {Update-AWSProfile -ProfileName 'Test' -AccessKeyId 'ff19-5d55' -SecretAccessKey '4cd2-b6da' -SessionToken '8406-ad68' -AccountID '123' -Role 'user' -SessionDuration 600} | Should -Throw
         }
 
         it 'Profile not found' {
@@ -64,7 +64,7 @@ Describe 'Update-AWSProfile' {
                 return '[Dev]'
             }
 
-            {Update-AWSProfile -ProfileName 'Test' -AccessKeyId 'ff19-5d55' -SecretAccessKey '4cd2-b6da' -SessionToken '8406-ad68' -AccountID '123' -Role 'user'} | Should -Throw
+            {Update-AWSProfile -ProfileName 'Test' -AccessKeyId 'ff19-5d55' -SecretAccessKey '4cd2-b6da' -SessionToken '8406-ad68' -AccountID '123' -Role 'user' -SessionDuration 600} | Should -Throw
         }
     }
 }

@@ -22,7 +22,7 @@ Describe 'New-AWSProfile' {
         }.GetNewClosure()
 
         Context "New profile in Source File: [$($test.SourceFile)] matches Answer File: [$($test.AnswerFile)]" {
-            New-AWSProfile -ProfileName 'New' -AccessKeyId 'ff19-5d55' -SecretAccessKey '4cd2-b6da' -SessionToken '8406-ad68' -AccountID '123' -Role 'user'
+            New-AWSProfile -ProfileName 'New' -AccessKeyId 'ff19-5d55' -SecretAccessKey '4cd2-b6da' -SessionToken '8406-ad68' -AccountID '123' -Role 'user' -SessionDuration 600
             $answer = Get-Content -Path ".\Tests\AWS.SAML\Profile\CredentialFiles\Answer\$($test.AnswerFile)"
             $output = Get-Content -Path 'TestDrive:\output'
             

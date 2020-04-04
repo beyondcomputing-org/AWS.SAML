@@ -23,7 +23,7 @@ Describe 'ConvertFrom-AWSCredential' {
             AccountID = '123'
             Role = 'user'
             LineStart = 5
-            LineEnd = 13
+            LineEnd = 14
             TestCases = @(
                 @{File = 'normal'},@{File = 'extra'},@{File = 'spacing'}
             )
@@ -36,7 +36,7 @@ Describe 'ConvertFrom-AWSCredential' {
             AccountID = ''
             Role = ''
             LineStart = 5
-            LineEnd = 13
+            LineEnd = 14
             TestCases = @(
                @{File = 'missing'}
             )
@@ -48,8 +48,8 @@ Describe 'ConvertFrom-AWSCredential' {
             SessionToken = '222'
             AccountID = ''
             Role = ''
-            LineStart = 14
-            LineEnd = 17
+            LineStart = 15
+            LineEnd = 18
             TestCases = @(
                 @{File = 'normal'},@{File = 'extra'},@{File = 'spacing'},@{File = 'missing'}
             )

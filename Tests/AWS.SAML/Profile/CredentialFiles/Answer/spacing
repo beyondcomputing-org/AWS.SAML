@@ -9,6 +9,7 @@ aws_secret_access_key = 4cd2-b6da
 aws_session_token = 8406-ad68
 aws_saml_accountid = 123
 aws_saml_role = user
+aws_saml_duration = 600
 
      [Prod]
       aws_access_key_id = 456

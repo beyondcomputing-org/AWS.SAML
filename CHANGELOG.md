@@ -4,6 +4,11 @@
 *These will be removed in the next major release*
 - N/A
 
+1.2.0
+-----
+- Added configurable session duration to the Profile
+- Added `Update-AWSSAML` and `uas` as alias for `Update-AWSSAMLLogin`
+
 1.1.0
 -----
 - Added configurable session duration support

@@ -10,6 +10,7 @@ aws_session_token = 8406-ad68
 extra = stuff
 aws_saml_accountid = 123
 aws_saml_role = user
+aws_saml_duration = 600
 extra2 = stuff2
 
 [Prod]

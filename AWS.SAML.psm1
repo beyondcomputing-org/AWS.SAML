@@ -64,7 +64,7 @@ function New-AWSSAMLLogin {
         # Store Credentials for use
         if($ProfileName){
             # Store in Profile
-            Set-AWSProfile -ProfileName $ProfileName -AccessKeyId $sts.Credentials.AccessKeyId -SecretAccessKey $sts.Credentials.SecretAccessKey -SessionToken $sts.Credentials.SessionToken -AccountID $consoleData.AccountID -Role $consoleData.Role
+            Set-AWSProfile -ProfileName $ProfileName -AccessKeyId $sts.Credentials.AccessKeyId -SecretAccessKey $sts.Credentials.SecretAccessKey -SessionToken $sts.Credentials.SessionToken -AccountID $consoleData.AccountID -Role $consoleData.Role -SessionDuration $SessionDuration
         }else{
             # Store in Environment Variable
             Add-AWSSTSCred -STS $sts
@@ -102,12 +102,13 @@ function New-AWSSAMLLogin {
 #>
 function Update-AWSSAMLLogin {
     [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
+    [Alias('Update-AWSSAML','uas')]
     param(
         [ValidateSet('Chrome', 'Firefox', 'Edge', 'IE')]
         [String]$Browser = 'Chrome',
         [Alias('Profile')]
         [String]$ProfileName,
-        [Int]$SessionDuration = 3600
+        [Int]$SessionDuration
     )
     if ($pscmdlet.ShouldProcess('AWS SAML', 'update'))
     {
@@ -137,11 +138,16 @@ function Update-AWSSAMLLogin {
                 # Get Role Details from SAML
                 $arns = Get-SAMLRole -Assertion $samlAssertion -AccountID $profile.AccountID -Role $profile.Role
 
+                # Allow passed in duration to override profile settings
+                if(!($SessionDuration)){
+                    $SessionDuration = $profile.Duration
+                }
+
                 # Get STS Credentials with SAML
                 $sts = Use-STSRoleWithSAML -PrincipalArn $arns.PrincipalArn -RoleArn $arns.RoleArn -SAMLAssertion $samlAssertion -DurationInSeconds $SessionDuration
 
                 # Update Profile
-                Set-AWSProfile -ProfileName $profile.Name -AccessKeyId $sts.Credentials.AccessKeyId -SecretAccessKey $sts.Credentials.SecretAccessKey -SessionToken $sts.Credentials.SessionToken -AccountID $profile.AccountID -Role $profile.Role
+                Set-AWSProfile -ProfileName $profile.Name -AccessKeyId $sts.Credentials.AccessKeyId -SecretAccessKey $sts.Credentials.SecretAccessKey -SessionToken $sts.Credentials.SessionToken -AccountID $profile.AccountID -Role $profile.Role -SessionDuration $profile.Duration
             }
         }
     }

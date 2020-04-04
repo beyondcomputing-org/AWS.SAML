@@ -27,6 +27,7 @@ function ConvertFrom-AWSCredential{
                     SessionToken = ''
                     AccountID = ''
                     Role = ''
+                    Duration = 3600
                 }
 
                 # Add Line markers to objects
@@ -73,6 +74,12 @@ function ConvertFrom-AWSCredential{
                 $r = $line.Replace('aws_saml_role', '').TrimStart(' =').TrimEnd()
                 Write-Verbose "Found Role: $r"
                 $profiles[-1].Role = $r
+                break
+            }
+            '^[\t ]*aws_saml_duration[\t ]*=' {
+                $r = $line.Replace('aws_saml_duration', '').TrimStart(' =').TrimEnd()
+                Write-Verbose "Found Duration: $r"
+                $profiles[-1].Duration = $r
                 break
             }
         }
@@ -122,7 +129,9 @@ function Update-AWSProfile{
         [Parameter(Mandatory=$true)]
         [String]$AccountID,
         [Parameter(Mandatory=$true)]
-        [String]$Role
+        [String]$Role,
+        [Parameter(Mandatory=$true)]
+        [Int]$SessionDuration
     )
 
     $file = Get-AWSCredentialFile
@@ -169,6 +178,9 @@ function Update-AWSProfile{
     # Update Role
     $content = Push-StringArrayValue -Array $content -Match '^[\t ]*aws_saml_role[\t ]*=' -Value "aws_saml_role = $Role"
 
+    # Update Session Duration
+    $content = Push-StringArrayValue -Array $content -Match '^[\t ]*aws_saml_duration[\t ]*=' -Value "aws_saml_duration = $SessionDuration"
+
     # Add blank line
     $content += ''
 
@@ -193,7 +205,9 @@ function New-AWSProfile{
         [Parameter(Mandatory=$true)]
         [String]$AccountID,
         [Parameter(Mandatory=$true)]
-        [String]$Role
+        [String]$Role,
+        [Parameter(Mandatory=$true)]
+        [Int]$SessionDuration
     )
 
     # Must set return type as array to handle null values
@@ -210,6 +224,7 @@ function New-AWSProfile{
     $file += "aws_session_token = $SessionToken"
     $file += "aws_saml_accountid = $AccountID"
     $file += "aws_saml_role = $Role"
+    $file += "aws_saml_duration = $SessionDuration"
 
     # Save Changes
     if ($pscmdlet.ShouldProcess('AWS Credential File', "Add Profile: $ProfileName"))
@@ -233,12 +248,14 @@ function Set-AWSProfile{
         [Parameter(Mandatory=$true)]
         [String]$AccountID,
         [Parameter(Mandatory=$true)]
-        [String]$Role
+        [String]$Role,
+        [Parameter(Mandatory=$true)]
+        [Int]$SessionDuration
     )
 
     if(Get-AWSProfile -ProfileName $ProfileName){
-        Update-AWSProfile -Profile $ProfileName -AccessKeyId $AccessKeyId -SecretAccessKey $SecretAccessKey -SessionToken $SessionToken -AccountID $AccountID -Role $Role
+        Update-AWSProfile -Profile $ProfileName -AccessKeyId $AccessKeyId -SecretAccessKey $SecretAccessKey -SessionToken $SessionToken -AccountID $AccountID -Role $Role -SessionDuration $SessionDuration
     }else{
-        New-AwsProfile -Profile $ProfileName -AccessKeyId $AccessKeyId -SecretAccessKey $SecretAccessKey -SessionToken $SessionToken -AccountID $AccountID -Role $Role
+        New-AwsProfile -Profile $ProfileName -AccessKeyId $AccessKeyId -SecretAccessKey $SecretAccessKey -SessionToken $SessionToken -AccountID $AccountID -Role $Role -SessionDuration $SessionDuration
     }
 }
