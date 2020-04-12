@@ -4,6 +4,10 @@
 *These will be removed in the next major release*
 - N/A
 
+1.4.0
+-----
+- Added auto update support for chrome drivers on MacOS
+
 1.3.0
 -----
 - Added auto update support for chrome drivers on Windows

@@ -17,7 +17,9 @@ function Get-ChromeVersion {
     )
     switch ($true) {
         $IsMacOS {
-            throw 'Chrome Driver Management Not Implemented for MacOS Yet!'
+            # Example response: Google Chrome 80.0.3987.163
+            $response = & '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --version
+            return $response.trim(' ').split(' ')[-1]
         }
         $IsLinux {
             throw 'Chrome Driver Management Not Implemented for Linux Yet!'
@@ -80,6 +82,15 @@ function Install-ChromeDriver{
     # Download File
     $DownloadFile = Invoke-ChromeDriverDownload -DriverFolder $DriverFolder -DriverVersion $DriverVersion
     Expand-Archive -LiteralPath $DownloadFile -DestinationPath "$DriverFolder\$DriverVersion"
+
+    # Additional File Prep
+    if($IsMacOS){
+        # Mark as Executable
+        Push-Location "$DriverFolder\$DriverVersion"
+        & 'chmod' 755 chromedriver
+        Pop-Location
+    }
+
     Remove-Item $DownloadFile
 }
 
