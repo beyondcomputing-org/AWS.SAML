@@ -4,6 +4,11 @@
 *These will be removed in the next major release*
 - N/A
 
+1.5.0
+-----
+- Handle updating profiles that the user no longer has access to
+- Clearing output from selenium driver
+
 1.4.0
 -----
 - Added auto update support for chrome drivers on MacOS

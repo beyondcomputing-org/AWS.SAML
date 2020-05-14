@@ -55,6 +55,9 @@ function New-AWSSAMLLogin {
         # Close Browser
         $Driver.quit()
 
+        # Clear Screen
+        Clear-Host
+
         # Get Role Details from SAML
         $arns = Get-SAMLRole -Assertion $samlAssertion -AccountID $consoleData.AccountID -Role $consoleData.Role
 
@@ -137,17 +140,18 @@ function Update-AWSSAMLLogin {
 
                 # Get Role Details from SAML
                 $arns = Get-SAMLRole -Assertion $samlAssertion -AccountID $profile.AccountID -Role $profile.Role
+                if($arns){
+                    # Allow passed in duration to override profile settings
+                    if(!($SessionDuration)){
+                        $SessionDuration = $profile.Duration
+                    }
 
-                # Allow passed in duration to override profile settings
-                if(!($SessionDuration)){
-                    $SessionDuration = $profile.Duration
+                    # Get STS Credentials with SAML
+                    $sts = Use-STSRoleWithSAML -PrincipalArn $arns.PrincipalArn -RoleArn $arns.RoleArn -SAMLAssertion $samlAssertion -DurationInSeconds $SessionDuration
+
+                    # Update Profile
+                    Set-AWSProfile -ProfileName $profile.Name -AccessKeyId $sts.Credentials.AccessKeyId -SecretAccessKey $sts.Credentials.SecretAccessKey -SessionToken $sts.Credentials.SessionToken -AccountID $profile.AccountID -Role $profile.Role -SessionDuration $profile.Duration
                 }
-
-                # Get STS Credentials with SAML
-                $sts = Use-STSRoleWithSAML -PrincipalArn $arns.PrincipalArn -RoleArn $arns.RoleArn -SAMLAssertion $samlAssertion -DurationInSeconds $SessionDuration
-
-                # Update Profile
-                Set-AWSProfile -ProfileName $profile.Name -AccessKeyId $sts.Credentials.AccessKeyId -SecretAccessKey $sts.Credentials.SecretAccessKey -SessionToken $sts.Credentials.SessionToken -AccountID $profile.AccountID -Role $profile.Role -SessionDuration $profile.Duration
             }
         }
     }

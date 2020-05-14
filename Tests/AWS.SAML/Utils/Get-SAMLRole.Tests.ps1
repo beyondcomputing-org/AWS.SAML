@@ -30,5 +30,13 @@ Describe 'Get-SAMLRole' {
             $Data = Get-SAMLRole -Assertion $samlAssertion -AccountID $accountID -Role $role
             $Data.RoleArn | Should Be "arn:aws:iam::$accountID`:role/$role"
         }
+
+        It 'Returns null when not found' {
+            Mock Write-Warning -ModuleName AWS.SAML.Utils {}
+            $Data = Get-SAMLRole -Assertion $samlAssertion -AccountID '99999' -Role 'NA'
+            
+            Assert-MockCalled Write-Warning -ModuleName AWS.SAML.Utils -Exactly -Times 1
+            $Data | Should Be $null
+        }
     }
 }

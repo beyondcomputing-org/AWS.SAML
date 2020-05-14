@@ -31,9 +31,14 @@ function Get-SAMLRole{
     # Get Role ARN's
     $arns = ($roles | Select-String "$AccountID`:role/$Role") -split ','
 
-    return [ordered]@{
-        PrincipalArn = $arns[1]
-        RoleArn = $arns[0]
+    if($arns){
+        return [ordered]@{
+            PrincipalArn = $arns[1]
+            RoleArn = $arns[0]
+        }
+    }else{
+        Write-Warning "No Role: <$Role> found for Account: <$AccountID>"
+        return $null
     }
 }
 
