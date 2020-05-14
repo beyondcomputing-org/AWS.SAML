@@ -45,6 +45,7 @@ function Get-SAMLRole{
 Function Push-StringArrayValue{
     [OutputType([System.Collections.Hashtable])]
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter','')] # False Positive
     param(
         [Array]$Array,
         [String]$Match,

@@ -20,7 +20,7 @@ function ConvertFrom-AWSCredential{
                 Write-Verbose "Found Profile: $name"
 
                 # Create Object
-                $profile = [ordered]@{
+                $_profile = [ordered]@{
                     Name = $name
                     AccessKeyId = ''
                     SecretAccessKey = ''
@@ -37,13 +37,13 @@ function ConvertFrom-AWSCredential{
                         $profiles[-1].LineEnd = $i -1
                     }
 
-                    $profile += [ordered]@{
+                    $_profile += [ordered]@{
                         LineStart = $i
                         LineEnd = $i
                     }
                 }
 
-                $profiles += [pscustomobject]$profile
+                $profiles += [pscustomobject]$_profile
                 break
             }
             '^[\t ]*aws_access_key_id[\t ]*=' {
@@ -140,21 +140,21 @@ function Update-AWSProfile{
         Throw 'No Profiles available to Update'
     }
 
-    $profile = ConvertFrom-AWSCredential -Content $file -LineMarkers | Where-Object {$_.Name -eq $ProfileName}
+    $_profile = ConvertFrom-AWSCredential -Content $file -LineMarkers | Where-Object {$_.Name -eq $ProfileName}
 
-    if(!($profile)){
+    if(!($_profile)){
         Throw "Profile: $ProfileName not found"
     }
 
     # Split lines on profile
-    if($profile.LineStart -gt 0){
-        $before = $file[0..($profile.LineStart -1)]
+    if($_profile.LineStart -gt 0){
+        $before = $file[0..($_profile.LineStart -1)]
     }
 
-    $content = $file[$profile.LineStart..$profile.LineEnd]
+    $content = $file[$_profile.LineStart..$_profile.LineEnd]
 
-    if($profile.LineEnd -lt $file.GetUpperBound(0)){
-        $after = $file[($profile.LineEnd + 1)..$file.GetUpperBound(0)]
+    if($_profile.LineEnd -lt $file.GetUpperBound(0)){
+        $after = $file[($_profile.LineEnd + 1)..$file.GetUpperBound(0)]
     }
 
     # Remove whitespace
