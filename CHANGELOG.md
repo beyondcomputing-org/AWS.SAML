@@ -4,6 +4,10 @@
 *These will be removed in the next major release*
 - N/A
 
+1.6.0
+-----
+- Allowing SAML Login Initiation URL to be passed to Update-AWSSAMLLogin cmdlet
+
 1.5.0
 -----
 - Handle updating profiles that the user no longer has access to

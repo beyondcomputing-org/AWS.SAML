@@ -94,6 +94,9 @@ function New-AWSSAMLLogin {
     .EXAMPLE
         C:\PS> Update-AWSSAMLLogin
 
+    .PARAMETER InitURL
+        The SAML Login Initiation URL.  If not passed you will be prompted if an existing Initiation URL is not found.
+
     .PARAMETER Browser
         Choose the browser to handle the login process.  Options: Chrome, Firefox, Edge, IE  Default: Chrome
 
@@ -107,6 +110,7 @@ function Update-AWSSAMLLogin {
     [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='Low')]
     [Alias('Update-AWSSAML','uas')]
     param(
+        [String]$InitURL,
         [ValidateSet('Chrome', 'Firefox', 'Edge', 'IE')]
         [String]$Browser = 'Chrome',
         [Alias('Profile')]
@@ -115,7 +119,9 @@ function Update-AWSSAMLLogin {
     )
     if ($pscmdlet.ShouldProcess('AWS SAML', 'update'))
     {
-        $InitURL = Get-AWSSAMLURL
+        if([String]::IsNullOrWhiteSpace($InitURL)){
+            $InitURL = Get-AWSSAMLURL
+        }
 
         # Start Browser for Login
         $driver = Start-Browser -InitURL $InitURL -Browser $Browser -Headless
