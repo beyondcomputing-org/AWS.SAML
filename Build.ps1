@@ -1,5 +1,5 @@
 # Install Requirements
-Install-Module Pester -Force
+Install-Module Pester -Force -MaximumVersion 4.10.1
 Install-Module PSScriptAnalyzer -Force
 
 # Run Unit Tests

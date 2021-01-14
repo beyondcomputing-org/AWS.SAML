@@ -7,6 +7,7 @@
 1.7.0
 -----
 - Updated dependencies
+- Updated Pester to be locked on v4
 
 1.6.0
 -----
